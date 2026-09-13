@@ -1,0 +1,15 @@
+# Compiled Object files
+*.o
+*.obj
+
+# Executables
+*.exe
+*.out
+main
+
+# Build directories
+/build/
+/out/
+
+# OS-generated hidden files
+.DS_Store
