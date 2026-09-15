@@ -20,6 +20,8 @@ public:
     void enrol(Course* c);
     void dropCourse(Course* c);
     void displayMenu() override;
+    
+    bool hasCompleted(Course* c) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Student& s);
 };
