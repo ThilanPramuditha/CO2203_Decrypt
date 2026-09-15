@@ -1,0 +1,12 @@
+#include "LabCourse.h"
+#include "CustomExceptions.h"
+
+LabCourse::LabCourse(std::string code, std::string t, int cap, TimetableSlot ts, int groupSize)
+    : Course(std::move(code), std::move(t), cap, ts), labGroupSize(groupSize) {}
+
+bool LabCourse::isEligible(Student* s) const {
+    if (getEnrolledCount() >= labGroupSize) {
+        throw CapacityException("Lab course physical station capacity reached.");
+    }
+    return true; 
+}
