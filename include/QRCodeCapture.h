@@ -3,10 +3,6 @@
 
 #include "AttendanceCapture.h"
 
-// ==========================================
-// Concrete strategy: generates a one-time session token that
-// students "scan" (in this simulation, submit) to check in.
-// ==========================================
 class QRCodeCapture : public AttendanceCapture {
 private:
     std::string sessionToken;

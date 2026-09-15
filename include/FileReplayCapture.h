@@ -3,11 +3,6 @@
 
 #include "AttendanceCapture.h"
 
-// ==========================================
-// Concrete strategy: replays previously recorded attendance
-// swipes/scans from a flat file. Useful for testing/demo data
-// without needing real hardware.
-// ==========================================
 class FileReplayCapture : public AttendanceCapture {
 private:
     std::string filename;

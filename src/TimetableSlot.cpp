@@ -10,7 +10,7 @@ int TimetableSlot::getEndTime() const { return endTime; }
 std::string TimetableSlot::getLocation() const { return location; }
 
 // Two slots clash if they fall on the same day AND their time
-// intervals overlap. Interval overlap test: (startA < endB) && (startB < endA).
+
 bool TimetableSlot::operator==(const TimetableSlot& other) const {
     bool sameDay = (dayOfWeek == other.dayOfWeek);
     bool timesOverlap = (startTime < other.endTime) && (other.startTime < endTime);

@@ -3,12 +3,6 @@
 
 #include <string>
 
-// ==========================================
-// Since AttendanceRecord is immutable, any manual fix
-// (e.g. a lecturer marking a student present who was
-// missed by the capture device) is logged here instead,
-// preserving a full audit trail.
-// ==========================================
 class CorrectionRecord {
 private:
     std::string actingLecturer;
