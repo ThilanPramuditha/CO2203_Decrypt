@@ -6,10 +6,12 @@
 
 class ProjectCourse : public Course {
 private:
-    std::string supervisorID;
+  std::string supervisorID;
 
 public:
-    bool isEligible(Student* s) const override;
+  ProjectCourse(std::string code, std::string title, int cap,
+                TimetableSlot sched, std::string supervisor);
+  bool isEligible(Student *s) const override;
 };
 
 #endif // PROJECT_COURSE_H

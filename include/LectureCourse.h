@@ -2,10 +2,14 @@
 #define LECTURE_COURSE_H
 
 #include "Course.h"
+#include <string>
 
 class LectureCourse : public Course {
 public:
-    bool isEligible(Student* s) const override;
+  LectureCourse(std::string code, std::string title, int cap,
+                TimetableSlot sched);
+
+  bool isEligible(Student *s) const override;
 };
 
 #endif // LECTURE_COURSE_H
