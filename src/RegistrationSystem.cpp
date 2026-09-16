@@ -7,15 +7,27 @@
 #include "LabCourse.h"
 #include "ProjectCourse.h"
 #include "TimetableSlot.h"
+#include "CustomExceptions.h"
 
 // Initialize the file paths via the constructor initialization list
 RegistrationSystem::RegistrationSystem() 
     : userRepo("data/users_data.txt"), courseRepo("data/courses_data.txt") {}
 
-// Safely delete dynamically allocated pointers
+// Destructor to safely clean up dynamically allocated memory
 RegistrationSystem::~RegistrationSystem() {
-    for (Person* p : usersList) { delete p; }
-    for (Course* c : coursesList) { delete c; }
+    // Clean up all dynamically allocated Person objects
+    for (Person* p : usersList) {
+        delete p;
+    }
+    usersList.clear();
+
+    // Clean up all dynamically allocated Course objects
+    for (Course* c : coursesList) {
+        delete c;
+    }
+    coursesList.clear();
+
+    std::cout << "[System] Memory cleanup complete. Shutting down safely.\n";
 }
 
 void RegistrationSystem::loadSystemData() {
@@ -51,11 +63,58 @@ void RegistrationSystem::saveSystemData() {
     courseRepo.saveAll(coursesList);
 }
 
-void RegistrationSystem::run() {
-    loadSystemData();
-    std::cout << "System Engine is now running. Waiting for UI integration...\n";
+Person* RegistrationSystem::loginUser() {
+    std::string inputID;
+    
+    while (true) {
+        std::cout << "\n=========================================\n";
+        std::cout << "  UNIVERSITY REGISTRATION SYSTEM LOGIN\n";
+        std::cout << "=========================================\n";
+        std::cout << "Enter User ID (or type 'exit' to shut down): ";
+        std::cin >> inputID;
+
+        if (inputID == "exit") {
+            return nullptr; // Signals the engine to shut down
+        }
+
+        // Iterate through the master list to find the matching user
+        for (Person* user : usersList) {
+            if (user->getID() == inputID) {
+                std::cout << "\n[System] Authentication successful. Welcome!\n";
+                return user; // Return the memory address of the logged-in user
+            }
+        }
+        
+        std::cout << "[Error] User ID not found. Please try again.\n";
+    }
 }
 
-Person* RegistrationSystem::loginUser() {
-    return nullptr; // Stub for login routing
+void RegistrationSystem::run() {
+    // Boot up and load data
+    loadSystemData();
+    
+    // The Main Application Loop
+    while (true) {
+        Person* currentUser = loginUser();
+        
+        // If login returns nullptr, the user typed 'exit'
+        if (currentUser == nullptr) {
+            std::cout << "Initiating system shutdown sequence...\n";
+            break; 
+        }
+
+        // The Polymorphic UI and Safety Net
+        try {
+            // Polymorphic routing: C++ determines the correct menu at runtime
+            currentUser->displayMenu(); 
+        } 
+        catch (const CustomException& e) {
+            // Globally catch any business rule violations (like ClashException)
+            std::cout << "\n[System Alert] " << e.what() << "\n";
+        }
+        catch (const std::exception& e) {
+            // Failsafe for standard C++ errors
+            std::cout << "\n[Fatal Error] " << e.what() << "\n";
+        }
+    }
 }
