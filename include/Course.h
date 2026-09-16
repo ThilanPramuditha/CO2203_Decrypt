@@ -22,7 +22,7 @@ private:
 
 public:
     Course(std::string code, std::string title, int capacity, TimetableSlot schedule);
-    virtual ~Course() = default;
+    virtual ~Course();
 
     TimetableSlot getSchedule() const;
     virtual bool isEligible(Student* s) const = 0; 

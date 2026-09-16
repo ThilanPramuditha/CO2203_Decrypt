@@ -1,14 +1,17 @@
 #include "Course.h"
-#include <iostream>
+#include <utility>
 
-Course::Course(std::string code, std::string t, int cap, TimetableSlot ts) 
-    : courseCode(std::move(code)), title(std::move(t)), capacity(cap), schedule(ts), registerSheet() {}
+Course::Course(std::string code, std::string t, int cap, TimetableSlot sched)
+    : courseCode(std::move(code)), title(std::move(t)), capacity(cap), schedule(sched) {}
+
+Course::~Course() {}
 
 TimetableSlot Course::getSchedule() const {
     return schedule;
 }
 
+// FIX: Enforced strict CSV formatting
 std::ostream& operator<<(std::ostream& os, const Course& c) {
-    os << "Course Code: " << c.courseCode << " | Title: " << c.title;
+    os << "LectureCourse," << c.courseCode << "," << c.title << "," << c.capacity;
     return os;
 }

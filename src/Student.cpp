@@ -3,7 +3,7 @@
 #include "CustomExceptions.h"
 #include <iostream>
 #include <algorithm>
-#include <limits> // Added for input validation
+#include <limits> 
 
 Student::Student(std::string id, std::string name) : Person(std::move(id), std::move(name)) {}
 
@@ -33,7 +33,7 @@ bool Student::hasCompleted(Course* c) const {
 
 void Student::displayMenu() {
     int choice = 0;
-    while (choice != 5) { // Interactive menu loop
+    while (choice != 5) { 
         std::cout << "\n--- Student Dashboard ---\n";
         std::cout << "1. View Enrolled Courses\n";
         std::cout << "2. Enrol in a Course\n";
@@ -42,7 +42,6 @@ void Student::displayMenu() {
         std::cout << "5. Logout\n";
         std::cout << "Enter choice: ";
         
-        // Input error handling
         if (!(std::cin >> choice)) {
             std::cin.clear(); 
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
@@ -61,15 +60,6 @@ void Student::displayMenu() {
             case 2:
                 std::cout << "\n--- Enrol in Course ---\n";
                 std::cout << "(Pending system integration)\n";
-                
-                // Exception handling block
-                /* 
-                try {
-                    enrol(selectedCourse);
-                } catch (const std::exception& e) {
-                    std::cout << "\n[ERROR] " << e.what() << "\n";
-                }
-                */
                 break;
             case 3:
                 std::cout << "\n--- Drop Course ---\n";
@@ -88,7 +78,8 @@ void Student::displayMenu() {
     }
 }
 
+// FIX: Enforced strict CSV formatting for File I/O
 std::ostream& operator<<(std::ostream& os, const Student& s) {
-    os << "Student [ID: " << s.getID() << "]";
+    os << "Student," << s.getID();
     return os;
 }

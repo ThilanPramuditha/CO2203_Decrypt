@@ -11,9 +11,10 @@ private:
 
 public:
     Person(std::string id, std::string name);
-    virtual ~Person() = default; 
+    virtual ~Person(); 
 
     std::string getID() const;
+    
     virtual void displayMenu() = 0; 
 };
 
