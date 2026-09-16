@@ -21,7 +21,7 @@ public:
     }
 
     // Generic method to read a file and reconstruct object pointers
-    std::vector<T*> loadAll() {
+    std::vector<T*> loadAll() { 
         std::vector<T*> loadedEntities;
         // Stub for File I/O implementation
         std::cout << "[Repository] Loading data from " << filePath << "...\n";
