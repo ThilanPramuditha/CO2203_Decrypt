@@ -1,10 +1,10 @@
-#include "../include/Timetable.h"
+#include "Timetable.h"
+#include "CustomExceptions.h"
 #include <ostream>
-#include <stdexcept>
 
 void Timetable::addSlot(const TimetableSlot& slot) {
     if (checkClash(slot)) {
-        throw std::runtime_error("New slot clashes with an existing timetable entry.");
+        throw ClashException("New slot clashes with an existing timetable entry.");
     }
     slots.push_back(slot);
 }

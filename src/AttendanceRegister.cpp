@@ -1,8 +1,8 @@
-#include "../include/AttendanceRegister.h"
-#include "../include/TimetableSlot.h"
+#include "AttendanceRegister.h"
+#include "TimetableSlot.h"
+#include "CustomExceptions.h"
 #include <ctime>
 #include <sstream>
-#include <stdexcept>
 
 AttendanceRegister::~AttendanceRegister() {
     for (AttendanceSession* session : sessions) {
@@ -29,7 +29,7 @@ void AttendanceRegister::addRecord(const AttendanceRecord& record) {
     for (const auto& existing : records) {
         if (existing.getStudentID() == record.getStudentID() &&
             existing.getSessionID() == record.getSessionID()) {
-            throw std::runtime_error("Duplicate attendance record for student " + record.getStudentID());
+            throw DuplicateAttendanceException("Student " + record.getStudentID() + " already marked present in session " + record.getSessionID());
         }
     }
     records.push_back(record);

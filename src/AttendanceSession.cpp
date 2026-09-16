@@ -1,7 +1,7 @@
-#include "../include/AttendanceSession.h"
-#include "../include/AttendanceCapture.h"
+#include "AttendanceSession.h"
+#include "AttendanceCapture.h"
+#include "CustomExceptions.h"
 #include <iostream>
-#include <stdexcept>
 
 int AttendanceSession::defaultExpiryDuration = 15;
 
@@ -14,7 +14,7 @@ void AttendanceSession::setCaptureMechanism(AttendanceCapture* mechanism) {
 
 void AttendanceSession::executeCapture() {
     if (activeMechanism == nullptr) {
-        throw std::runtime_error("No capture mechanism set for session " + sessionID);
+        throw CustomException("No capture mechanism set for session " + sessionID);
     }
 
     activeMechanism->beginSession();
