@@ -8,6 +8,7 @@
 #include "ProjectCourse.h"
 #include "TimetableSlot.h"
 #include "CustomExceptions.h"
+#include "FileReplayCapture.h"
 
 // Initialize the file paths via the constructor initialization list
 RegistrationSystem::RegistrationSystem() 
@@ -70,18 +71,45 @@ Person* RegistrationSystem::loginUser() {
         std::cout << "\n=========================================\n";
         std::cout << "  UNIVERSITY REGISTRATION SYSTEM LOGIN\n";
         std::cout << "=========================================\n";
-        std::cout << "Enter User ID (or type 'exit' to shut down): ";
+        std::cout << "Enter User ID ('exit' to shutdown, 'test' for diagnostics): ";
         std::cin >> inputID;
 
         if (inputID == "exit") {
-            return nullptr; // Signals the engine to shut down
+            return nullptr; 
         }
 
-        // Iterate through the master list to find the matching user
+        // --- AUTOMATED TESTING HARNESS ---
+        if (inputID == "test") {
+            std::cout << "\n--- INITIATING AUTOMATED EXCEPTION TEST ---\n";
+            try {
+                // Instantiate the testing mechanism
+                FileReplayCapture fileTest("data/test_attendance.txt");
+                fileTest.beginSession();
+                
+                std::string capturedID;
+                // Loop until End of File is reached
+                while ((capturedID = fileTest.captureNext()) != "EOF") {
+                    std::cout << "[Scanner] Processed ID: " << capturedID << "\n";
+                }
+                
+                fileTest.endSession();
+            } 
+            catch (const CustomException& e) {
+                // Prove that the system catches the error without crashing!
+                std::cout << "\n[SUCCESS] Engine safely intercepted malformed data!\n";
+                std::cout << ">> Exception Thrown: " << e.what() << "\n";
+            } 
+            catch (const std::exception& e) {
+                std::cout << "\n[Fatal File Error] " << e.what() << "\n";
+            }
+            continue; // Go back to the login prompt without crashing
+        }
+        // -----------------------------------------
+
         for (Person* user : usersList) {
             if (user->getID() == inputID) {
                 std::cout << "\n[System] Authentication successful. Welcome!\n";
-                return user; // Return the memory address of the logged-in user
+                return user; 
             }
         }
         
