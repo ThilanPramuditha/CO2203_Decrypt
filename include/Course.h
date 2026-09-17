@@ -30,6 +30,7 @@ public:
     int getCapacity() const { return capacity; }
     size_t getEnrolledCount() const { return enrolledStudents.size(); }
     const std::vector<Course*>& getPrerequisites() const { return prerequisites; }
+    void addPrerequisite(Course* c) { prerequisites.push_back(c); }
 
     friend std::ostream& operator<<(std::ostream& os, const Course& c);
 };
