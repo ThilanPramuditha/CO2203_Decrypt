@@ -16,7 +16,7 @@ public:
     AttendanceSession(const std::string& sessionID, const std::string& sessionDate);
 
     void setCaptureMechanism(AttendanceCapture* mechanism);
-    void executeCapture();
+    void executeCapture(class AttendanceRegister* reg);
 
     std::string getSessionID() const;
     std::string getSessionDate() const;

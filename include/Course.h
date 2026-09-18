@@ -26,6 +26,7 @@ public:
 
     TimetableSlot getSchedule() const;
     std::string getCourseCode() const { return courseCode; }
+    AttendanceRegister* getRegister() { return &registerSheet; }
     virtual std::string getCourseType() const = 0;
     virtual bool isEligible(Student* s) const = 0; 
     

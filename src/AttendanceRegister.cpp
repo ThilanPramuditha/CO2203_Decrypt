@@ -25,6 +25,13 @@ void AttendanceRegister::openSession(const TimetableSlot& slot) {
     sessions.push_back(newSession);
 }
 
+AttendanceSession* AttendanceRegister::getActiveSession() const {
+    if (sessions.empty()) {
+        return nullptr;
+    }
+    return sessions.back();
+}
+
 void AttendanceRegister::addRecord(const AttendanceRecord& record) {
     for (const auto& existing : records) {
         if (existing.getStudentID() == record.getStudentID() &&

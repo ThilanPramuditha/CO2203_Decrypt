@@ -24,6 +24,7 @@ public:
     AttendanceRegister& operator=(const AttendanceRegister&) = delete;
 
     void openSession(const TimetableSlot& slot);
+    AttendanceSession* getActiveSession() const;
     void addRecord(const AttendanceRecord& record);
     void appendCorrection(const CorrectionRecord& record);
     float calculatePercentage(const std::string& studentID) const;

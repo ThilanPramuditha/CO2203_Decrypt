@@ -16,7 +16,6 @@ public:
 
     void openSession(Course* c);
     void closeSession(std::string sessionID);
-    
     void displayMenu(RegistrationSystem* sys) override;
 };
 

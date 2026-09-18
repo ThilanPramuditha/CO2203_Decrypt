@@ -11,7 +11,6 @@ void Administrator::createCourse() { std::cout << "Creating new course...\n"; }
 void Administrator::editCourse(std::string courseCode) { std::cout << "Editing course...\n"; }
 void Administrator::removeCourse(std::string courseCode) { std::cout << "Removing course...\n"; }
 void Administrator::generateReport() { std::cout << "Generating system report...\n"; }
-
 void Administrator::displayMenu(RegistrationSystem* sys) {
     int choice = 0;
     while (choice != 5) { // Interactive menu loop
