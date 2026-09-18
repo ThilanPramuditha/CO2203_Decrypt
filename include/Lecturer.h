@@ -14,9 +14,14 @@ private:
 public:
     Lecturer(std::string id, std::string name);
 
+    void addTaughtCourse(Course* c) { taughtCourses.push_back(c); }
+    const std::vector<Course*>& getTaughtCourses() const { return taughtCourses; }
+
     void openSession(Course* c);
     void closeSession(std::string sessionID);
     void displayMenu(RegistrationSystem* sys) override;
+    
+    std::string getRole() const override { return "Lecturer"; }
 };
 
-#endif // LECTURER_H
+#endif

@@ -12,8 +12,8 @@ public:
   LabCourse(std::string code, std::string title, int cap, TimetableSlot sched,
             int groupSize);
 
-  bool isEligible(Student *s) const override;
+  void checkEligibility(Student *s) const override;
   std::string getCourseType() const override { return "LabCourse"; }
 };
 
-#endif // LAB_COURSE_H
+#endif

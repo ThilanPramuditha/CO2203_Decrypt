@@ -6,16 +6,14 @@ LabCourse::LabCourse(std::string code, std::string t, int cap, TimetableSlot ts,
                      int groupSize)
     : Course(std::move(code), std::move(t), cap, ts), labGroupSize(groupSize) {}
 
-bool LabCourse::isEligible(Student *s) const {
+void LabCourse::checkEligibility(Student *s) const {
     if (getEnrolledCount() >= static_cast<size_t>(labGroupSize)) {
-        return false;
+        throw CapacityException("Course is at full capacity.");
     }
 
     for (Course* prereq : getPrerequisites()) {
         if (!s->hasCompleted(prereq)) {
-            return false;
+            throw CustomException("Prerequisites not met for this course.");
         }
     }
-    
-    return true;
 }

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <cctype>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -15,7 +16,6 @@ void QRCodeCapture::beginSession() {
     sessionStartTime = now;
     int randomPart = std::rand() % 9000 + 1000;
     
-    // 1. Dynamic Token Generation (Session ID + Expiry + Hash)
     sessionToken = "TOKEN-SESSION1-" + std::to_string(now) + "-" + std::to_string(randomPart);
     
 #ifdef _WIN32
@@ -24,24 +24,20 @@ void QRCodeCapture::beginSession() {
 
     std::cout << "QR session started.\n";
     
-    // 2. Library Integration: Encode and print the ASCII QR Code
     try {
         QrCode qr = QrCode::encodeText(sessionToken.c_str(), QrCode::Ecc::MEDIUM);
         
-        // Print top border for padding
         for (int x = 0; x < qr.getSize() + 4; x++) std::cout << "  ";
         std::cout << "\n";
         
         for (int y = 0; y < qr.getSize(); y++) {
-            std::cout << "    "; // Left border padding
+            std::cout << "    ";
             for (int x = 0; x < qr.getSize(); x++) {
-                // Using standard extended ASCII block characters for the QR code
                 std::cout << (qr.getModule(x, y) ? "██" : "  ");
             }
-            std::cout << "    \n"; // Right border padding
+            std::cout << "    \n";
         }
         
-        // Print bottom border for padding
         for (int x = 0; x < qr.getSize() + 4; x++) std::cout << "  ";
         std::cout << "\n";
         
@@ -51,18 +47,20 @@ void QRCodeCapture::beginSession() {
 }
 
 std::string QRCodeCapture::captureNext() {
-    // 3. Validation: Prompt for decoded payload
     while (true) {
         std::cout << "\nEnter decoded QR Token (or 'exit' to stop): ";
         std::string tokenInput;
         std::getline(std::cin, tokenInput);
         
-        if (std::difftime(std::time(nullptr), sessionStartTime) > 60) {
+        if (std::difftime(std::time(nullptr), sessionStartTime) > 120) {
             std::cout << "[ERROR] QR Code has expired. Session closed.\n";
             return "exit";
         }
         
-        if (tokenInput == "exit" || tokenInput.empty()) {
+        std::string lowerToken = tokenInput;
+        for (char& c : lowerToken) c = std::tolower(c);
+        
+        if (lowerToken == "exit" || tokenInput.empty()) {
             return "exit";
         }
         

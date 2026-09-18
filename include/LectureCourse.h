@@ -9,8 +9,8 @@ public:
   LectureCourse(std::string code, std::string title, int cap,
                 TimetableSlot sched);
 
-  bool isEligible(Student *s) const override;
+  void checkEligibility(Student *s) const override;
   std::string getCourseType() const override { return "LectureCourse"; }
 };
 
-#endif // LECTURE_COURSE_H
+#endif

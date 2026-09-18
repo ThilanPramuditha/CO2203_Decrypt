@@ -3,7 +3,6 @@
 
 #include <string>
 
-// Abstract strategy for attendance capture
 class AttendanceCapture {
 public:
     virtual ~AttendanceCapture() = default;
@@ -11,6 +10,7 @@ public:
     virtual void beginSession() = 0;
     virtual std::string captureNext() = 0;
     virtual void endSession() = 0;
+    virtual std::string getCaptureMethod() const = 0;
 };
 
-#endif // ATTENDANCE_CAPTURE_H
+#endif

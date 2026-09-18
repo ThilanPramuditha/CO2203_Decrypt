@@ -16,7 +16,7 @@ public:
     AttendanceSession(const std::string& sessionID, const std::string& sessionDate);
 
     void setCaptureMechanism(AttendanceCapture* mechanism);
-    void executeCapture(class AttendanceRegister* reg);
+    void executeCapture(class Course* course);
 
     std::string getSessionID() const;
     std::string getSessionDate() const;
@@ -25,4 +25,4 @@ public:
     static void setDefaultExpiryDuration(int minutes);
 };
 
-#endif // ATTENDANCE_SESSION_H
+#endif

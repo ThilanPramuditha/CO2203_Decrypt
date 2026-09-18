@@ -7,22 +7,20 @@
 #include <fstream>
 #include <sstream>     
 #include <stdexcept>   
+#include <iomanip>
 #include "Person.h"
 #include "Student.h"
 #include "Lecturer.h"
+#include "Administrator.h"
 #include "Course.h"
 #include "LectureCourse.h"
 #include "LabCourse.h"
 #include "ProjectCourse.h"
 #include "TimetableSlot.h"
 
-// Generic Template Declaration
 template <typename T>
 class Repository;
 
-// ---------------------------------------------------------
-// EXPLICIT SPECIALIZATION FOR PERSON
-// ---------------------------------------------------------
 template <>
 class Repository<Person> {
 private:
@@ -39,8 +37,11 @@ public:
         }
         
         std::cout << "[Repository] Saving " << entities.size() << " records to " << filePath << "...\n";
-        // Simplified saving logic, omitting dynamic_cast
-        // Normally handled via virtual serialization methods.
+        
+        for (const Person* entity : entities) {
+            outFile << entity->getRole() << "," << entity->getID() << "," << entity->getName() << "\n";
+        }
+        
         outFile.close();
     }
 
@@ -49,7 +50,6 @@ public:
         std::ifstream inFile(filePath);
 
         if (!inFile.is_open()) {
-            // Graceful handling: create the file if it doesn't exist
             std::ofstream newFile(filePath);
             newFile.close();
             return loadedEntities; 
@@ -59,6 +59,9 @@ public:
         std::cout << "[Repository] Loading Person data from " << filePath << "...\n";
 
         while (std::getline(inFile, line)) {
+            if (!line.empty() && line.back() == '\r') {
+                line.pop_back();
+            }
             if (line.empty()) continue; 
 
             std::stringstream ss(line);
@@ -72,6 +75,8 @@ public:
                 loadedEntities.push_back(new Student(id, name));
             } else if (role == "Lecturer") {
                 loadedEntities.push_back(new Lecturer(id, name));
+            } else if (role == "Administrator") {
+                loadedEntities.push_back(new Administrator(id, name));
             }
         }
 
@@ -80,9 +85,6 @@ public:
     }
 };
 
-// ---------------------------------------------------------
-// EXPLICIT SPECIALIZATION FOR COURSE
-// ---------------------------------------------------------
 template <>
 class Repository<Course> {
 private:
@@ -99,6 +101,19 @@ public:
         }
         
         std::cout << "[Repository] Saving " << entities.size() << " records to " << filePath << "...\n";
+        for (const Course* entity : entities) {
+            std::string prereq = "NONE";
+            if (!entity->getPrerequisites().empty()) {
+                prereq = entity->getPrerequisites()[0]->getCourseCode();
+            }
+            outFile << *entity << ","
+                    << entity->getSchedule().getLocation() << ","
+                    << entity->getSupervisorID() << ","
+                    << entity->getSchedule().getDayOfWeek() << ","
+                    << std::setfill('0') << std::setw(4) << entity->getSchedule().getStartTime() << ","
+                    << std::setfill('0') << std::setw(4) << entity->getSchedule().getEndTime() << ","
+                    << prereq << "\n";
+        }
         outFile.close();
     }
 
@@ -107,7 +122,6 @@ public:
         std::ifstream inFile(filePath);
 
         if (!inFile.is_open()) {
-            // Graceful handling: create the file if it doesn't exist
             std::ofstream newFile(filePath);
             newFile.close();
             return loadedEntities; 
@@ -117,10 +131,14 @@ public:
         std::cout << "[Repository] Loading Course data from " << filePath << "...\n";
 
         while (std::getline(inFile, line)) {
+            if (!line.empty() && line.back() == '\r') {
+                line.pop_back();
+            }
             if (line.empty()) continue; 
 
             std::stringstream ss(line);
             std::string type, code, title, capacityStr, location, supervisor;
+            std::string dayStr, startStr, endStr, prereqStr;
             
             std::getline(ss, type, ',');
             std::getline(ss, code, ',');
@@ -128,19 +146,39 @@ public:
             std::getline(ss, capacityStr, ',');
             std::getline(ss, location, ',');
             std::getline(ss, supervisor, ',');
+            std::getline(ss, dayStr, ',');
+            std::getline(ss, startStr, ',');
+            std::getline(ss, endStr, ',');
+            std::getline(ss, prereqStr, ',');
             
             int cap = capacityStr.empty() ? 0 : std::stoi(capacityStr);
+            int day = dayStr.empty() ? 1 : std::stoi(dayStr);
+            int start = startStr.empty() ? 800 : std::stoi(startStr);
+            int end = endStr.empty() ? 1000 : std::stoi(endStr);
             
-            // Inject default time values for TimetableSlot
-            TimetableSlot defaultSlot(1, 800, 1000, location);
+            TimetableSlot parsedSlot(day, start, end, location);
             
+            Course* newCourse = nullptr;
             if (type == "LectureCourse") {
-                loadedEntities.push_back(new LectureCourse(code, title, cap, defaultSlot));
+                newCourse = new LectureCourse(code, title, cap, parsedSlot);
             } else if (type == "LabCourse") {
                 int groupSize = cap / 2;
-                loadedEntities.push_back(new LabCourse(code, title, cap, defaultSlot, groupSize));
+                newCourse = new LabCourse(code, title, cap, parsedSlot, groupSize);
             } else if (type == "ProjectCourse") {
-                loadedEntities.push_back(new ProjectCourse(code, title, cap, defaultSlot, supervisor));
+                newCourse = new ProjectCourse(code, title, cap, parsedSlot);
+            }
+            
+            if (newCourse) {
+                newCourse->setSupervisorID(supervisor);
+                if (!prereqStr.empty() && prereqStr != "NONE") {
+                    for (Course* prev : loadedEntities) {
+                        if (prev->getCourseCode() == prereqStr) {
+                            newCourse->addPrerequisite(prev);
+                            break;
+                        }
+                    }
+                }
+                loadedEntities.push_back(newCourse);
             }
         }
 
@@ -149,4 +187,4 @@ public:
     }
 };
 
-#endif // REPOSITORY_H
+#endif

@@ -25,6 +25,15 @@ void AttendanceRegister::openSession(const TimetableSlot& slot) {
     sessions.push_back(newSession);
 }
 
+void AttendanceRegister::restoreSession(const std::string& sessionID) {
+    for (AttendanceSession* s : sessions) {
+        if (s->getSessionID() == sessionID) {
+            return;
+        }
+    }
+    sessions.push_back(new AttendanceSession(sessionID, "Restored Session"));
+}
+
 AttendanceSession* AttendanceRegister::getActiveSession() const {
     if (sessions.empty()) {
         return nullptr;

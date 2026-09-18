@@ -2,6 +2,7 @@
 #include "AttendanceCapture.h"
 #include "CustomExceptions.h"
 #include <iostream>
+#include <cctype>
 
 int AttendanceSession::defaultExpiryDuration = 15;
 
@@ -13,32 +14,42 @@ void AttendanceSession::setCaptureMechanism(AttendanceCapture* mechanism) {
 }
 
 #include "AttendanceRegister.h"
+#include "Course.h"
 #include <ctime>
 
-void AttendanceSession::executeCapture(AttendanceRegister* reg) {
+void AttendanceSession::executeCapture(Course* course) {
     if (activeMechanism == nullptr) {
         throw CustomException("No capture mechanism set for session " + sessionID);
     }
 
+    AttendanceRegister* reg = course->getRegister();
     activeMechanism->beginSession();
 
     while (true) {
         std::string id = activeMechanism->captureNext();
-        if (id == "exit" || id.empty()) {
+        
+        std::string lowerId = id;
+        for (char& c : lowerId) c = std::tolower(c);
+        
+        if (lowerId == "exit" || id.empty()) {
             break;
         }
         
-        std::time_t now = std::time(nullptr);
-        char ts[20];
-        std::strftime(ts, sizeof(ts), "%Y-%m-%d %H:%M:%S", std::localtime(&now));
-        
-        AttendanceRecord record(id, sessionID, ts, "PRESENT", "ConsoleCardReader");
-        
         try {
+            if (!course->isStudentEnrolled(id)) {
+                throw NotEnrolledException("Student " + id + " is not enrolled in this course.");
+            }
+            
+            std::time_t now = std::time(nullptr);
+            char ts[20];
+            std::strftime(ts, sizeof(ts), "%Y-%m-%d %H:%M:%S", std::localtime(&now));
+            
+            AttendanceRecord record(id, sessionID, ts, "PRESENT", activeMechanism->getCaptureMethod());
+            
             reg->addRecord(record);
             std::cout << "Captured attendance for: " << id << "\n";
         } catch (const CustomException& e) {
-            std::cout << "[Error] " << e.what() << "\n";
+            std::cout << "[ERROR] " << e.what() << "\n";
         }
     }
 

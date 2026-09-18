@@ -5,7 +5,10 @@
 #include <string>
 
 class Administrator : public Person {
+private:
+    RegistrationSystem* sysRef = nullptr;
 public:
+    void setSystem(RegistrationSystem* sys) { sysRef = sys; }
     Administrator(std::string id, std::string name);
 
     void createUser();
@@ -17,6 +20,8 @@ public:
     void generateReport();
 
     void displayMenu(RegistrationSystem* sys) override;
+    
+    std::string getRole() const override { return "Administrator"; }
 };
 
-#endif // ADMINISTRATOR_H
+#endif

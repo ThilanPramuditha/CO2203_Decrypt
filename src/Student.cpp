@@ -12,9 +12,7 @@
 Student::Student(std::string id, std::string name) : Person(std::move(id), std::move(name)) {}
 
 void Student::enrol(Course* c) {
-    if (!c->isEligible(this)) {
-        throw CustomException("Student failed eligibility checks for this course.");
-    }
+    c->checkEligibility(this);
     
     if (personalTimetable.checkClash(c->getSchedule())) {
         throw ClashException("Timetable clash detected with an existing course.");
@@ -22,12 +20,15 @@ void Student::enrol(Course* c) {
     
     enrolledCourses.push_back(c);
     personalTimetable.addSlot(c->getSchedule());
+    c->addStudent(this);
 }
 
 void Student::dropCourse(Course* c) {
     auto it = std::find(enrolledCourses.begin(), enrolledCourses.end(), c);
     if (it != enrolledCourses.end()) {
+        personalTimetable.removeSlot(c->getSchedule());
         enrolledCourses.erase(it);
+        c->removeStudent(this);
     }
 }
 
@@ -36,6 +37,7 @@ bool Student::hasCompleted(Course* c) const {
 }
 
 void Student::displayMenu(RegistrationSystem* sys) {
+    std::cout << "\n--- Welcome back, " << this->getName() << "! ---\n";
     int choice = 0;
     while (choice != 5) { 
         std::cout << "\n--- Student Dashboard ---\n";
@@ -88,13 +90,11 @@ void Student::displayMenu(RegistrationSystem* sys) {
                 
                 std::cout << "Attempting to enrol " << getID() << " in " << targetCourse->getCourseCode() << "...\n";
                 
-                // Wrap the enrol() function in a try/catch block
                 try {
                     enrol(targetCourse); 
                     std::cout << "[SUCCESS] Successfully enrolled!\n";
                 } 
                 catch (const CustomException& e) {
-                    // Catches the domain error without crashing the terminal
                     std::cout << "\n[BLOCKED BY SYSTEM] " << e.what() << "\n";
                 }
                 catch (const std::exception& e) {
@@ -108,12 +108,25 @@ void Student::displayMenu(RegistrationSystem* sys) {
                 if (enrolledCourses.empty()) {
                     std::cout << "Action Failed: You are not currently enrolled in any courses.\n";
                 } else {
-                    // Automatically grab the last enrolled course and safely drop it
-                    Course* c = enrolledCourses.back();
-                    std::cout << "Dropping most recent course...\n";
+                    std::cout << "Enter Course Code to drop: ";
+                    std::string code;
+                    std::cin >> code;
+                    
+                    Course* targetCourse = sys->findCourse(code);
+                    if (!targetCourse) {
+                        std::cout << "[ERROR] Course not found in system.\n";
+                        break;
+                    }
+                    
+                    auto it = std::find(enrolledCourses.begin(), enrolledCourses.end(), targetCourse);
+                    if (it == enrolledCourses.end()) {
+                        std::cout << "[ERROR] You are not enrolled in " << code << ".\n";
+                        break;
+                    }
+                    
                     try {
-                        dropCourse(c);
-                        std::cout << "[SUCCESS] Course dropped successfully.\n";
+                        dropCourse(targetCourse);
+                        std::cout << "[SUCCESS] Course " << code << " dropped successfully.\n";
                     } 
                     catch (const CustomException& e) {
                         std::cout << "\n[BLOCKED BY SYSTEM] " << e.what() << "\n";
@@ -140,7 +153,6 @@ void Student::displayMenu(RegistrationSystem* sys) {
     }
 }
 
-// FIX: Enforced strict CSV formatting for File I/O
 std::ostream& operator<<(std::ostream& os, const Student& s) {
     os << "Student," << s.getID();
     return os;

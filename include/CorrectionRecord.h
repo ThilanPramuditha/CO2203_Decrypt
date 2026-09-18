@@ -15,4 +15,4 @@ public:
     std::string getReason() const;
 };
 
-#endif // CORRECTION_RECORD_H
+#endif

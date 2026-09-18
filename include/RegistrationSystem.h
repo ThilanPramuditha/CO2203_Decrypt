@@ -11,7 +11,6 @@ private:
     std::vector<Person*> usersList;
     std::vector<Course*> coursesList;
     
-    // Aggregation of the generic repositories
     Repository<Person> userRepo;
     Repository<Course> courseRepo;
 
@@ -25,7 +24,14 @@ public:
     void saveSystemData();
 
     const std::vector<Course*>& getCourses() const;
+    const std::vector<Person*>& getUsers() const;
+    
+    void addUser(Person* p);
+    void removeUser(const std::string& userID);
+    void addCourse(Course* c);
+    void removeCourse(const std::string& courseCode);
+
     Course* findCourse(const std::string& courseCode) const;
 };
 
-#endif // REGISTRATION_SYSTEM_H
+#endif

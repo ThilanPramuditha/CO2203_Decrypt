@@ -16,8 +16,11 @@ public:
     virtual ~Person(); 
 
     std::string getID() const;
+    std::string getName() const;
+    void setName(const std::string& newName) { name = newName; }
+    virtual std::string getRole() const = 0;
     
     virtual void displayMenu(RegistrationSystem* sys) = 0; 
 };
 
-#endif // PERSON_H
+#endif

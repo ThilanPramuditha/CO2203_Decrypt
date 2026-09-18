@@ -1,5 +1,6 @@
 #include "RegistrationSystem.h"
 #include <iostream>
+#include <algorithm>
 #include "Student.h"
 #include "Lecturer.h"
 #include "Administrator.h"
@@ -10,19 +11,15 @@
 #include "CustomExceptions.h"
 #include "FileReplayCapture.h"
 
-// Initialize the file paths via the constructor initialization list
 RegistrationSystem::RegistrationSystem() 
     : userRepo("data/users_data.csv"), courseRepo("data/courses_data.csv") {}
 
-// Destructor to safely clean up dynamically allocated memory
 RegistrationSystem::~RegistrationSystem() {
-    // Clean up all dynamically allocated Person objects
     for (Person* p : usersList) {
         delete p;
     }
     usersList.clear();
 
-    // Clean up all dynamically allocated Course objects
     for (Course* c : coursesList) {
         delete c;
     }
@@ -37,8 +34,85 @@ void RegistrationSystem::loadSystemData() {
     usersList = userRepo.loadAll();
     coursesList = courseRepo.loadAll();
 
-    // Include hardcoded Admin to prevent lockdown
-    usersList.push_back(new Administrator("A001", "Admin Kaveesha"));
+
+    std::ifstream enrolIn("data/enrolments_data.csv");
+    if (enrolIn.is_open()) {
+        std::string line;
+        while (std::getline(enrolIn, line)) {
+            if (!line.empty() && line.back() == '\r') {
+                line.pop_back();
+            }
+            if (line.empty()) continue;
+            std::stringstream ss(line);
+            std::string studentID, courseCode;
+            std::getline(ss, studentID, ',');
+            std::getline(ss, courseCode, ',');
+            
+            Student* targetStudent = nullptr;
+            for (Person* p : usersList) {
+                if (p->getID() == studentID) {
+                    if (p->getRole() == "Student") {
+                        targetStudent = static_cast<Student*>(p);
+                    }
+                    break;
+                }
+            }
+            
+            Course* targetCourse = findCourse(courseCode);
+            
+            if (targetStudent && targetCourse) {
+                try {
+                    targetStudent->enrol(targetCourse);
+                } catch (...) {
+                }
+            }
+        }
+        enrolIn.close();
+    }
+    
+    std::ifstream attIn("data/attendance_data.csv");
+    if (attIn.is_open()) {
+        std::string line;
+        while (std::getline(attIn, line)) {
+            if (!line.empty() && line.back() == '\r') {
+                line.pop_back();
+            }
+            if (line.empty()) continue;
+            std::stringstream ss(line);
+            std::string cCode, sID, sessID, timestamp, status, method;
+            std::getline(ss, cCode, ',');
+            std::getline(ss, sID, ',');
+            std::getline(ss, sessID, ',');
+            std::getline(ss, timestamp, ',');
+            std::getline(ss, status, ',');
+            std::getline(ss, method, ',');
+            
+            Course* targetCourse = findCourse(cCode);
+            if (targetCourse) {
+                targetCourse->getRegister()->restoreSession(sessID);
+                AttendanceRecord record(sID, sessID, timestamp, status, method);
+                try {
+                    targetCourse->getRegister()->addRecord(record);
+                } catch (...) {
+                }
+            }
+        }
+        attIn.close();
+    }
+    
+    for (Course* c : coursesList) {
+        std::string supID = c->getSupervisorID();
+        if (!supID.empty()) {
+            for (Person* p : usersList) {
+                if (p->getID() == supID) {
+                    if (Lecturer* l = dynamic_cast<Lecturer*>(p)) {
+                        l->addTaughtCourse(c);
+                    }
+                    break;
+                }
+            }
+        }
+    }
 
     std::cout << "[System] Successfully loaded " << usersList.size() << " users and " 
               << coursesList.size() << " courses into memory.\n";
@@ -47,10 +121,72 @@ void RegistrationSystem::loadSystemData() {
 void RegistrationSystem::saveSystemData() {
     userRepo.saveAll(usersList);
     courseRepo.saveAll(coursesList);
+    
+    std::ofstream enrolOut("data/enrolments_data.csv");
+    if (enrolOut.is_open()) {
+        for (Person* p : usersList) {
+            if (p->getRole() == "Student") {
+                Student* s = static_cast<Student*>(p);
+                for (Course* c : s->getEnrolledCourses()) {
+                    enrolOut << s->getID() << "," << c->getCourseCode() << "\n";
+                }
+            }
+        }
+        enrolOut.close();
+    }
+    
+    std::ofstream attOut("data/attendance_data.csv");
+    if (attOut.is_open()) {
+        for (Course* c : coursesList) {
+            for (const AttendanceRecord& record : c->getRegister()->getRecords()) {
+                attOut << c->getCourseCode() << ","
+                       << record.getStudentID() << ","
+                       << record.getSessionID() << ","
+                       << record.getTimestamp() << ","
+                       << record.getStatus() << ","
+                       << record.getCaptureMethod() << "\n";
+            }
+        }
+        attOut.close();
+    }
+}
+
+const std::vector<Person*>& RegistrationSystem::getUsers() const {
+    return usersList;
 }
 
 const std::vector<Course*>& RegistrationSystem::getCourses() const {
     return coursesList;
+}
+
+void RegistrationSystem::addUser(Person* user) {
+    usersList.push_back(user);
+}
+
+void RegistrationSystem::addCourse(Course* course) {
+    coursesList.push_back(course);
+}
+
+void RegistrationSystem::removeUser(const std::string& userID) {
+    auto it = std::find_if(usersList.begin(), usersList.end(), [&](Person* p) { return p->getID() == userID; });
+    if (it != usersList.end()) {
+        delete *it;
+        usersList.erase(it);
+        std::cout << "[System] User " << userID << " successfully removed.\n";
+    } else {
+        std::cout << "[ERROR] User not found.\n";
+    }
+}
+
+void RegistrationSystem::removeCourse(const std::string& courseCode) {
+    auto it = std::find_if(coursesList.begin(), coursesList.end(), [&](Course* c) { return c->getCourseCode() == courseCode; });
+    if (it != coursesList.end()) {
+        delete *it;
+        coursesList.erase(it);
+        std::cout << "[System] Course " << courseCode << " successfully removed.\n";
+    } else {
+        std::cout << "[ERROR] Course not found.\n";
+    }
 }
 
 Course* RegistrationSystem::findCourse(const std::string& courseCode) const {
@@ -69,44 +205,49 @@ Person* RegistrationSystem::loginUser() {
         std::cout << "\n=========================================\n";
         std::cout << "  UNIVERSITY REGISTRATION SYSTEM LOGIN\n";
         std::cout << "=========================================\n";
-        std::cout << "Enter User ID ('exit' to shutdown, 'test' for diagnostics): ";
+        std::cout << "Enter User ID ('exit' to shutdown): ";
         std::cin >> inputID;
 
-        if (inputID == "exit") {
+        std::string lowerInput = inputID;
+        for (char& c : lowerInput) c = std::tolower(c);
+
+        if (lowerInput == "exit") {
             return nullptr; 
         }
 
-        // --- AUTOMATED TESTING HARNESS ---
-        if (inputID == "test") {
+        for (char& c : inputID) c = std::toupper(c);
+
+        if (inputID == "TEST") {
             std::cout << "\n--- INITIATING AUTOMATED EXCEPTION TEST ---\n";
-            try {
-                // Instantiate the testing mechanism
-                FileReplayCapture fileTest("data/test_attendance.txt");
-                fileTest.beginSession();
-                
-                std::string capturedID;
-                // Loop until End of File is reached
-                while ((capturedID = fileTest.captureNext()) != "EOF") {
+            FileReplayCapture fileTest("data/test_attendance.txt");
+            fileTest.beginSession();
+            
+            while (true) {
+                try {
+                    std::string capturedID = fileTest.captureNext();
+                    if (capturedID == "EOF") break;
                     std::cout << "[Scanner] Processed ID: " << capturedID << "\n";
+                } 
+                catch (const CustomException& e) {
+                    std::cout << "\n[SUCCESS] Engine safely intercepted malformed data!\n";
+                    std::cout << ">> Exception Thrown: " << e.what() << "\n";
+                } 
+                catch (const std::exception& e) {
+                    std::cout << "\n[Fatal File Error] " << e.what() << "\n";
+                    break;
                 }
-                
-                fileTest.endSession();
-            } 
-            catch (const CustomException& e) {
-                // Prove that the system catches the error without crashing
-                std::cout << "\n[SUCCESS] Engine safely intercepted malformed data!\n";
-                std::cout << ">> Exception Thrown: " << e.what() << "\n";
-            } 
-            catch (const std::exception& e) {
-                std::cout << "\n[Fatal File Error] " << e.what() << "\n";
             }
-            continue; // Go back to the login prompt without crashing
+            
+            fileTest.endSession();
+            continue;
         }
-        // -----------------------------------------
 
         for (Person* user : usersList) {
             if (user->getID() == inputID) {
                 std::cout << "\n[System] Authentication successful. Welcome!\n";
+                if (user->getRole() == "Administrator") {
+                    static_cast<Administrator*>(user)->setSystem(this);
+                }
                 return user; 
             }
         }
@@ -116,30 +257,24 @@ Person* RegistrationSystem::loginUser() {
 }
 
 void RegistrationSystem::run() {
-    // Boot up and load data
     loadSystemData();
     
-    // The Main Application Loop
     while (true) {
         Person* currentUser = loginUser();
         
-        // If login returns nullptr, the user typed 'exit'
         if (currentUser == nullptr) {
             std::cout << "Initiating system shutdown sequence...\n";
+            saveSystemData();
             break; 
         }
 
-        // The Polymorphic UI and Safety Net
         try {
-            // Polymorphic routing: C++ determines the correct menu at runtime
             currentUser->displayMenu(this); 
         } 
         catch (const CustomException& e) {
-            // Globally catch any business rule violations (like ClashException)
             std::cout << "\n[System Alert] " << e.what() << "\n";
         }
         catch (const std::exception& e) {
-            // Failsafe for standard C++ errors
             std::cout << "\n[Fatal Error] " << e.what() << "\n";
         }
     }

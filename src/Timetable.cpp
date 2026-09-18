@@ -9,6 +9,15 @@ void Timetable::addSlot(const TimetableSlot& slot) {
     slots.push_back(slot);
 }
 
+void Timetable::removeSlot(const TimetableSlot& slot) {
+    for (auto it = slots.begin(); it != slots.end(); ++it) {
+        if (*it == slot) {
+            slots.erase(it);
+            break;
+        }
+    }
+}
+
 bool Timetable::checkClash(const TimetableSlot& slot) const {
     for (const auto& existingSlot : slots) {
         if (existingSlot == slot) {

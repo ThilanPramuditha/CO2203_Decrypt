@@ -24,4 +24,4 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const TimetableSlot& slot);
 };
 
-#endif // TIMETABLE_SLOT_H
+#endif

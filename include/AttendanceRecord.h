@@ -27,4 +27,4 @@ public:
     bool isImmutable() const;
 };
 
-#endif // ATTENDANCE_RECORD_H
+#endif

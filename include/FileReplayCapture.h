@@ -3,23 +3,22 @@
 
 #include "AttendanceCapture.h"
 #include <string>
-#include <fstream> // Required to maintain the file stream state
+#include <fstream>
 
 class FileReplayCapture : public AttendanceCapture {
 private:
     std::string filename;
-    std::ifstream replayStream; // Private state variable to keep the file open during the session
+    std::ifstream replayStream;
 
 public:
     FileReplayCapture(std::string file);
     
-    // Virtual destructor ensures proper cleanup of derived objects
     ~FileReplayCapture() override; 
 
-    // Implementing the pure virtual functions from the abstract base class
     void beginSession() override;
     std::string captureNext() override;
     void endSession() override;
+    std::string getCaptureMethod() const override { return "FileReplayCapture"; }
 };
 
-#endif // FILE_REPLAY_CAPTURE_H
+#endif

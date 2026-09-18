@@ -13,6 +13,7 @@ public:
     void beginSession() override;
     std::string captureNext() override;
     void endSession() override;
+    std::string getCaptureMethod() const override { return "QRCodeCapture"; }
 };
 
-#endif // QR_CODE_CAPTURE_H
+#endif

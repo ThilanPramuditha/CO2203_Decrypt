@@ -8,6 +8,7 @@ public:
     void beginSession() override;
     std::string captureNext() override;
     void endSession() override;
+    std::string getCaptureMethod() const override { return "ConsoleCardReader"; }
 };
 
-#endif // CONSOLE_CARD_READER_H
+#endif

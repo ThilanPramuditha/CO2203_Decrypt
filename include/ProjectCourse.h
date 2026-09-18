@@ -5,14 +5,11 @@
 #include <string>
 
 class ProjectCourse : public Course {
-private:
-  std::string supervisorID;
-
 public:
   ProjectCourse(std::string code, std::string title, int cap,
-                TimetableSlot sched, std::string supervisor);
-  bool isEligible(Student *s) const override;
+                TimetableSlot sched);
+  void checkEligibility(Student *s) const override;
   std::string getCourseType() const override { return "ProjectCourse"; }
 };
 
-#endif // PROJECT_COURSE_H
+#endif

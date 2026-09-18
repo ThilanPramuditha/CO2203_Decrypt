@@ -21,9 +21,13 @@ public:
     void dropCourse(Course* c);
     void displayMenu(RegistrationSystem* sys) override;
     
+    const std::vector<Course*>& getEnrolledCourses() const { return enrolledCourses; }
+    
+    std::string getRole() const override { return "Student"; }
+    
     bool hasCompleted(Course* c) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Student& s);
 };
 
-#endif // STUDENT_H
+#endif

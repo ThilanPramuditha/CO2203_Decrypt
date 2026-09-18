@@ -40,4 +40,4 @@ public:
     explicit ClashException(std::string msg);
 };
 
-#endif // CUSTOM_EXCEPTIONS_H
+#endif

@@ -1,7 +1,7 @@
 #include "Lecturer.h"
 #include "Course.h" 
 #include <iostream>
-#include <limits> // Added for input validation
+#include <limits>
 
 #include "QRCodeCapture.h"
 #include "ConsoleCardReader.h"
@@ -27,7 +27,7 @@ void Lecturer::openSession(Course* c) {
     session->setCaptureMechanism(&reader);
     
     try {
-        session->executeCapture(reg);
+        session->executeCapture(c);
     } catch (const CustomException& e) {
         std::cout << "[ERROR] " << e.what() << "\n";
     }
@@ -38,8 +38,9 @@ void Lecturer::closeSession(std::string sessionID) {
 }
 
 void Lecturer::displayMenu(RegistrationSystem* sys) {
+    std::cout << "\n--- Welcome back, " << this->getName() << "! ---\n";
     int choice = 0;
-    while (choice != 4) { // Interactive menu loop
+    while (choice != 4) {
         std::cout << "\n--- Lecturer Dashboard ---\n";
         std::cout << "1. View Taught Courses\n";
         std::cout << "2. Open Attendance Session\n";
@@ -47,7 +48,6 @@ void Lecturer::displayMenu(RegistrationSystem* sys) {
         std::cout << "4. Logout\n";
         std::cout << "Enter choice: ";
         
-        // Input error handling
         if (!(std::cin >> choice)) {
             std::cin.clear(); 
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
@@ -60,18 +60,18 @@ void Lecturer::displayMenu(RegistrationSystem* sys) {
                 std::cout << "\n--- Taught Courses ---\n";
                 if (taughtCourses.empty()) std::cout << "No courses assigned.\n";
                 for (Course* c : taughtCourses) {
-                    std::cout << *c << "\n"; // Relies on your overloaded operator<< in Course
+                    std::cout << *c << "\n";
                 }
                 break;
             case 2: {
                 std::cout << "\n--- Open Attendance Session ---\n";
-                const auto& courses = sys->getCourses();
-                if (courses.empty()) {
-                    std::cout << "No courses available.\n";
+                if (taughtCourses.empty()) {
+                    std::cout << "No courses assigned.\n";
                     break;
                 }
+                
                 std::cout << "Available Courses:\n";
-                for (Course* c : courses) {
+                for (Course* c : taughtCourses) {
                     std::cout << *c << "\n";
                 }
                 
@@ -79,23 +79,61 @@ void Lecturer::displayMenu(RegistrationSystem* sys) {
                 std::string code;
                 std::cin >> code;
                 
-                // Clear the newline left in the input buffer by std::cin >>
-                // This prevents the next std::getline in ConsoleCardReader from reading an empty string and exiting immediately.
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 
-                Course* target = sys->findCourse(code);
+                Course* target = nullptr;
+                for (Course* c : taughtCourses) {
+                    if (c->getCourseCode() == code) {
+                        target = c;
+                        break;
+                    }
+                }
+                
                 if (!target) {
-                    std::cout << "[ERROR] Course not found.\n";
+                    std::cout << "[ERROR] Course not found in your assignments.\n";
                     break;
                 }
                 
                 openSession(target);
                 break;
             }
-            case 3:
+            case 3: {
                 std::cout << "\n--- Close Attendance Session ---\n";
-                std::cout << "(Pending system integration)\n";
+                if (taughtCourses.empty()) {
+                    std::cout << "No courses assigned.\n";
+                    break;
+                }
+                
+                std::cout << "Available Courses:\n";
+                for (Course* c : taughtCourses) {
+                    std::cout << *c << "\n";
+                }
+                
+                std::cout << "\nEnter Course Code to close session: ";
+                std::string code;
+                std::cin >> code;
+                
+                Course* target = nullptr;
+                for (Course* c : taughtCourses) {
+                    if (c->getCourseCode() == code) {
+                        target = c;
+                        break;
+                    }
+                }
+                
+                if (!target) {
+                    std::cout << "[ERROR] Course not found in your assignments.\n";
+                    break;
+                }
+                
+                AttendanceSession* s = target->getRegister()->getActiveSession();
+                if (s) {
+                    closeSession(s->getSessionID());
+                } else {
+                    std::cout << "[ERROR] No active session found to close.\n";
+                }
                 break;
+            }
             case 4:
                 std::cout << "Logging out...\n";
                 break;
