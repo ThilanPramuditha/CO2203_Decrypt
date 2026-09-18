@@ -13,6 +13,7 @@ public:
             int groupSize);
 
   bool isEligible(Student *s) const override;
+  std::string getCourseType() const override { return "LabCourse"; }
 };
 
 #endif // LAB_COURSE_H

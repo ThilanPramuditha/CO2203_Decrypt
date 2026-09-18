@@ -12,7 +12,7 @@ void Administrator::editCourse(std::string courseCode) { std::cout << "Editing c
 void Administrator::removeCourse(std::string courseCode) { std::cout << "Removing course...\n"; }
 void Administrator::generateReport() { std::cout << "Generating system report...\n"; }
 
-void Administrator::displayMenu() {
+void Administrator::displayMenu(RegistrationSystem* sys) {
     int choice = 0;
     while (choice != 5) { // Interactive menu loop
         std::cout << "\n--- Administrator Dashboard ---\n";

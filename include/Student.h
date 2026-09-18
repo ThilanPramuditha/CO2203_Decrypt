@@ -19,7 +19,7 @@ public:
 
     void enrol(Course* c);
     void dropCourse(Course* c);
-    void displayMenu() override;
+    void displayMenu(RegistrationSystem* sys) override;
     
     bool hasCompleted(Course* c) const;
 

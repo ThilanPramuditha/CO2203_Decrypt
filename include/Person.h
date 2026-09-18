@@ -3,6 +3,8 @@
 
 #include <string>
 
+class RegistrationSystem;
+
 class Person {
 private:
     std::string userID;
@@ -15,7 +17,7 @@ public:
 
     std::string getID() const;
     
-    virtual void displayMenu() = 0; 
+    virtual void displayMenu(RegistrationSystem* sys) = 0; 
 };
 
 #endif // PERSON_H

@@ -15,7 +15,8 @@ public:
     void editCourse(std::string courseCode);
     void removeCourse(std::string courseCode);
     void generateReport();
-    void displayMenu() override;
+
+    void displayMenu(RegistrationSystem* sys) override;
 };
 
 #endif // ADMINISTRATOR_H

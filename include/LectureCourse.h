@@ -10,6 +10,7 @@ public:
                 TimetableSlot sched);
 
   bool isEligible(Student *s) const override;
+  std::string getCourseType() const override { return "LectureCourse"; }
 };
 
 #endif // LECTURE_COURSE_H

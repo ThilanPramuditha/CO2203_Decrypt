@@ -25,6 +25,8 @@ public:
     virtual ~Course();
 
     TimetableSlot getSchedule() const;
+    std::string getCourseCode() const { return courseCode; }
+    virtual std::string getCourseType() const = 0;
     virtual bool isEligible(Student* s) const = 0; 
     
     int getCapacity() const { return capacity; }

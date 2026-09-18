@@ -13,7 +13,7 @@ void Lecturer::closeSession(std::string sessionID) {
     std::cout << "Closing session: " << sessionID << "\n";
 }
 
-void Lecturer::displayMenu() {
+void Lecturer::displayMenu(RegistrationSystem* sys) {
     int choice = 0;
     while (choice != 4) { // Interactive menu loop
         std::cout << "\n--- Lecturer Dashboard ---\n";

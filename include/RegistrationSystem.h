@@ -23,6 +23,9 @@ public:
     Person* loginUser();
     void loadSystemData();
     void saveSystemData();
+
+    const std::vector<Course*>& getCourses() const;
+    Course* findCourse(const std::string& courseCode) const;
 };
 
 #endif // REGISTRATION_SYSTEM_H

@@ -64,6 +64,19 @@ void RegistrationSystem::saveSystemData() {
     courseRepo.saveAll(coursesList);
 }
 
+const std::vector<Course*>& RegistrationSystem::getCourses() const {
+    return coursesList;
+}
+
+Course* RegistrationSystem::findCourse(const std::string& courseCode) const {
+    for (Course* c : coursesList) {
+        if (c->getCourseCode() == courseCode) {
+            return c;
+        }
+    }
+    return nullptr;
+}
+
 Person* RegistrationSystem::loginUser() {
     std::string inputID;
     
@@ -134,7 +147,7 @@ void RegistrationSystem::run() {
         // The Polymorphic UI and Safety Net
         try {
             // Polymorphic routing: C++ determines the correct menu at runtime
-            currentUser->displayMenu(); 
+            currentUser->displayMenu(this); 
         } 
         catch (const CustomException& e) {
             // Globally catch any business rule violations (like ClashException)

@@ -12,6 +12,6 @@ TimetableSlot Course::getSchedule() const {
 
 // FIX: Enforced strict CSV formatting
 std::ostream& operator<<(std::ostream& os, const Course& c) {
-    os << "LectureCourse," << c.courseCode << "," << c.title << "," << c.capacity;
+    os << c.getCourseType() << "," << c.courseCode << "," << c.title << "," << c.capacity;
     return os;
 }

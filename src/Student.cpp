@@ -4,6 +4,7 @@
 #include "LectureCourse.h"
 #include "TimetableSlot.h"
 #include "CustomExceptions.h"
+#include "RegistrationSystem.h"
 #include <iostream>
 #include <algorithm>
 #include <limits> 
@@ -34,7 +35,7 @@ bool Student::hasCompleted(Course* c) const {
     return std::find(completedCourses.begin(), completedCourses.end(), c) != completedCourses.end();
 }
 
-void Student::displayMenu() {
+void Student::displayMenu(RegistrationSystem* sys) {
     int choice = 0;
     while (choice != 5) { 
         std::cout << "\n--- Student Dashboard ---\n";
@@ -63,19 +64,33 @@ void Student::displayMenu() {
                 
             case 2: {
                 std::cout << "\n--- Enrol in Course ---\n";
-                std::cout << "Attempting to enrol S001 in CO2307 (Project Course)...\n";
                 
-                // Create a dummy course to test the exception limits
-                TimetableSlot dummySlot(3, 1400, 1600, "Hall A");
-                ProjectCourse testCourse("CO2307", "Software Engineering Project", 50, dummySlot, "L001");
+                const auto& courses = sys->getCourses();
+                if (courses.empty()) {
+                    std::cout << "No courses available in the system.\n";
+                    break;
+                }
                 
-                // Add a dummy prerequisite that S001 has not completed
-                LectureCourse prereqCourse("CO1101", "Programming Foundations", 100, dummySlot);
-                testCourse.addPrerequisite(&prereqCourse);
+                std::cout << "Available Courses:\n";
+                for (Course* c : courses) {
+                    std::cout << *c << "\n";
+                }
+                
+                std::cout << "\nEnter Course Code to enrol: ";
+                std::string code;
+                std::cin >> code;
+                
+                Course* targetCourse = sys->findCourse(code);
+                if (!targetCourse) {
+                    std::cout << "[ERROR] Course not found.\n";
+                    break;
+                }
+                
+                std::cout << "Attempting to enrol " << getID() << " in " << targetCourse->getCourseCode() << "...\n";
                 
                 // Wrap the enrol() function in a try/catch block
                 try {
-                    enrol(&testCourse); 
+                    enrol(targetCourse); 
                     std::cout << "[SUCCESS] Successfully enrolled!\n";
                 } 
                 catch (const CustomException& e) {
