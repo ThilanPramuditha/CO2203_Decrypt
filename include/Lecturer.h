@@ -19,6 +19,8 @@ public:
 
     void openSession(Course* c);
     void closeSession(std::string sessionID);
+    void viewEnrolmentList();
+    void viewAttendancePercentages();
     void displayMenu(RegistrationSystem* sys) override;
     
     std::string getRole() const override { return "Lecturer"; }

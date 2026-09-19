@@ -8,7 +8,7 @@ void ConsoleCardReader::beginSession() {
 std::string ConsoleCardReader::captureNext() {
     std::cout << "Tap card (type Student ID, or 'exit' to stop): ";
     std::string studentID;
-    std::getline(std::cin, studentID);
+    std::cin >> studentID;
     return studentID;
 }
 

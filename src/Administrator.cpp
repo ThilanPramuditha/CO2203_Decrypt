@@ -73,6 +73,8 @@ void Administrator::createCourse() {
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "Enter Title: ";
     std::string title; std::getline(std::cin, title);
+    std::cout << "Enter Credits: ";
+    int creds; std::cin >> creds;
     std::cout << "Enter Capacity: ";
     int cap; std::cin >> cap;
     
@@ -81,7 +83,7 @@ void Administrator::createCourse() {
 
     std::cout << "Enter Timetable Day (1=Mon, 7=Sun): ";
     int day; std::cin >> day;
-    std::cout << "Enter Start Time (e.g., 800): ";
+    std::cout << "Enter Start Time (e.g., 0800): ";
     int start; std::cin >> start;
     std::cout << "Enter End Time (e.g., 1000): ";
     int end; std::cin >> end;
@@ -89,17 +91,29 @@ void Administrator::createCourse() {
     std::cout << "Enter Location: ";
     std::string loc; std::getline(std::cin, loc);
     
+    std::cout << "Enter Prerequisite Course Code (or NONE): ";
+    std::string prereqStr; std::getline(std::cin, prereqStr);
+    
     TimetableSlot slot(day, start, end, loc);
     
     Course* c = nullptr;
-    if (type == "Lecture") c = new LectureCourse(code, title, cap, slot);
+    if (type == "Lecture") c = new LectureCourse(code, title, creds, cap, slot);
     else if (type == "Lab") {
         std::cout << "Enter Lab Group Size: ";
         int size; std::cin >> size;
-        c = new LabCourse(code, title, cap, slot, size);
+        c = new LabCourse(code, title, creds, cap, slot, size);
     }
-    else if (type == "Project") c = new ProjectCourse(code, title, cap, slot);
+    else if (type == "Project") c = new ProjectCourse(code, title, creds, cap, slot);
     else { std::cout << "[ERROR] Invalid course type.\n"; return; }
+    
+    if (prereqStr != "NONE" && !prereqStr.empty()) {
+        Course* prereq = sysRef->findCourse(prereqStr);
+        if (prereq) {
+            c->addPrerequisite(prereq);
+        } else {
+            std::cout << "[WARNING] Prerequisite course not found. Proceeding without prerequisite.\n";
+        }
+    }
     
     c->setSupervisorID(supervisor);
     sysRef->addCourse(c);
@@ -113,11 +127,30 @@ void Administrator::editCourse(std::string courseCode) {
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         std::cout << "Enter new Title: ";
         std::string newTitle; std::getline(std::cin, newTitle);
+        std::cout << "Enter new Credits: ";
+        int creds; std::cin >> creds;
         std::cout << "Enter new Capacity: ";
         int cap; std::cin >> cap;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        
+        std::cout << "Enter new Prerequisite Course Code (or NONE to clear): ";
+        std::string prereqStr; std::getline(std::cin, prereqStr);
         
         target->setTitle(newTitle);
+        target->setCredits(creds);
         target->setCapacity(cap);
+        
+        if (prereqStr == "NONE") {
+            std::cout << "[INFO] Prerequisite clearing is not currently supported through this menu.\n";
+        } else if (!prereqStr.empty()) {
+            Course* prereq = sysRef->findCourse(prereqStr);
+            if (prereq) {
+                target->addPrerequisite(prereq);
+            } else {
+                std::cout << "[WARNING] Prerequisite course not found. Prerequisite unchanged.\n";
+            }
+        }
+        
         std::cout << "[SUCCESS] Course updated.\n";
     } else {
         std::cout << "[ERROR] Course not found.\n";
@@ -143,10 +176,26 @@ void Administrator::generateReport() {
     std::cout << "=====================\n";
 }
 
+void Administrator::viewAttendancePercentages() {
+    if (!sysRef) return;
+    std::cout << "Enter Course Code: ";
+    std::string code; std::cin >> code;
+    Course* target = sysRef->findCourse(code);
+    if (!target) {
+        std::cout << "[ERROR] Course not found.\n";
+        return;
+    }
+    std::cout << "\n--- Attendance Percentages for " << target->getCourseCode() << " ---\n";
+    for (Student* s : target->getEnrolledStudents()) {
+        float pct = target->getRegister()->calculatePercentage(s->getID());
+        std::cout << s->getID() << " - " << s->getName() << ": " << pct << "%\n";
+    }
+}
+
 void Administrator::displayMenu(RegistrationSystem* sys) {
     std::cout << "\n--- Welcome back, Administrator " << this->getName() << "! ---\n";
     int choice = 0;
-    while (choice != 8) {
+    while (choice != 9) {
         std::cout << "\n--- Administrator Dashboard ---\n";
         std::cout << "1. Create User\n";
         std::cout << "2. Update User\n";
@@ -155,7 +204,8 @@ void Administrator::displayMenu(RegistrationSystem* sys) {
         std::cout << "5. Edit Course\n";
         std::cout << "6. Remove Course\n";
         std::cout << "7. Generate System Report\n";
-        std::cout << "8. Logout\n";
+        std::cout << "8. View Attendance Percentages\n";
+        std::cout << "9. Logout\n";
         std::cout << "Enter choice: ";
         
         if (!(std::cin >> choice)) {
@@ -204,6 +254,9 @@ void Administrator::displayMenu(RegistrationSystem* sys) {
                 generateReport();
                 break;
             case 8:
+                viewAttendancePercentages();
+                break;
+            case 9:
                 std::cout << "Logging out...\n";
                 break;
             default:

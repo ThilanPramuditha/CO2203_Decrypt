@@ -12,6 +12,8 @@
 
 Lecturer::Lecturer(std::string id, std::string name) : Person(std::move(id), std::move(name)) {}
 
+#include "FileReplayCapture.h"
+
 void Lecturer::openSession(Course* c) {
     std::cout << "Opening session for course " << c->getCourseCode() << "...\n";
     AttendanceRegister* reg = c->getRegister();
@@ -23,29 +25,113 @@ void Lecturer::openSession(Course* c) {
         return;
     }
     
-    QRCodeCapture reader;
-    session->setCaptureMechanism(&reader);
+    std::cout << "Select Capture Mechanism:\n";
+    std::cout << "1. Console Card Reader\n";
+    std::cout << "2. QR Code Token\n";
+    std::cout << "Enter choice (or TEST for replay): ";
+    std::string mechChoice;
+    std::cin >> mechChoice;
+    
+    AttendanceCapture* reader = nullptr;
+    if (mechChoice == "1") {
+        reader = new ConsoleCardReader();
+    } else if (mechChoice == "TEST") {
+        std::string filename;
+        std::cout << "Enter replay filename: ";
+        std::cin >> filename;
+        reader = new FileReplayCapture(filename);
+    } else {
+        reader = new QRCodeCapture();
+    }
+    
+    session->setCaptureMechanism(reader);
     
     try {
         session->executeCapture(c);
     } catch (const CustomException& e) {
         std::cout << "[ERROR] " << e.what() << "\n";
     }
+    delete reader;
 }
 
 void Lecturer::closeSession(std::string sessionID) {
     std::cout << "Closing session: " << sessionID << "\n";
 }
 
+void Lecturer::viewEnrolmentList() {
+    if (taughtCourses.empty()) {
+        std::cout << "No courses assigned.\n";
+        return;
+    }
+    std::cout << "Available Courses:\n";
+    for (Course* c : taughtCourses) {
+        std::cout << *c << "\n";
+    }
+    std::cout << "\nEnter Course Code: ";
+    std::string code;
+    std::cin >> code;
+    
+    Course* target = nullptr;
+    for (Course* c : taughtCourses) {
+        if (c->getCourseCode() == code) {
+            target = c;
+            break;
+        }
+    }
+    if (!target) {
+        std::cout << "[ERROR] Course not found in your assignments.\n";
+        return;
+    }
+    
+    std::cout << "\n--- Enrolment List for " << target->getCourseCode() << " ---\n";
+    for (Student* s : target->getEnrolledStudents()) {
+        std::cout << s->getID() << " - " << s->getName() << "\n";
+    }
+}
+
+void Lecturer::viewAttendancePercentages() {
+    if (taughtCourses.empty()) {
+        std::cout << "No courses assigned.\n";
+        return;
+    }
+    std::cout << "Available Courses:\n";
+    for (Course* c : taughtCourses) {
+        std::cout << *c << "\n";
+    }
+    std::cout << "\nEnter Course Code: ";
+    std::string code;
+    std::cin >> code;
+    
+    Course* target = nullptr;
+    for (Course* c : taughtCourses) {
+        if (c->getCourseCode() == code) {
+            target = c;
+            break;
+        }
+    }
+    if (!target) {
+        std::cout << "[ERROR] Course not found in your assignments.\n";
+        return;
+    }
+    
+    std::cout << "\n--- Attendance Percentages for " << target->getCourseCode() << " ---\n";
+    for (Student* s : target->getEnrolledStudents()) {
+        float pct = target->getRegister()->calculatePercentage(s->getID());
+        std::cout << s->getID() << " - " << s->getName() << ": " << pct << "%\n";
+    }
+}
+
 void Lecturer::displayMenu(RegistrationSystem* sys) {
     std::cout << "\n--- Welcome back, " << this->getName() << "! ---\n";
     int choice = 0;
-    while (choice != 4) {
+    while (choice != 6) {
         std::cout << "\n--- Lecturer Dashboard ---\n";
         std::cout << "1. View Taught Courses\n";
-        std::cout << "2. Open Attendance Session\n";
-        std::cout << "3. Close Attendance Session\n";
-        std::cout << "4. Logout\n";
+        std::cout << "2. View Enrolment List\n";
+        std::cout << "3. Open Attendance Session\n";
+        std::cout << "4. Close Attendance Session\n";
+        std::cout << "5. View Attendance Percentages\n";
+        std::cout << "6. Logout\n";
         std::cout << "Enter choice: ";
         
         if (!(std::cin >> choice)) {
@@ -63,7 +149,10 @@ void Lecturer::displayMenu(RegistrationSystem* sys) {
                     std::cout << *c << "\n";
                 }
                 break;
-            case 2: {
+            case 2:
+                viewEnrolmentList();
+                break;
+            case 3: {
                 std::cout << "\n--- Open Attendance Session ---\n";
                 if (taughtCourses.empty()) {
                     std::cout << "No courses assigned.\n";
@@ -97,7 +186,7 @@ void Lecturer::displayMenu(RegistrationSystem* sys) {
                 openSession(target);
                 break;
             }
-            case 3: {
+            case 4: {
                 std::cout << "\n--- Close Attendance Session ---\n";
                 if (taughtCourses.empty()) {
                     std::cout << "No courses assigned.\n";
@@ -129,12 +218,16 @@ void Lecturer::displayMenu(RegistrationSystem* sys) {
                 AttendanceSession* s = target->getRegister()->getActiveSession();
                 if (s) {
                     closeSession(s->getSessionID());
+                    s->close();
                 } else {
                     std::cout << "[ERROR] No active session found to close.\n";
                 }
                 break;
             }
-            case 4:
+            case 5:
+                viewAttendancePercentages();
+                break;
+            case 6:
                 std::cout << "Logging out...\n";
                 break;
             default:

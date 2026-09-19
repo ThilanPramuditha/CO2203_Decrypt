@@ -31,8 +31,17 @@ RegistrationSystem::~RegistrationSystem() {
 void RegistrationSystem::loadSystemData() {
     std::cout << "--- BOOTING SYSTEM: LOADING DATA ---\n";
 
-    usersList = userRepo.loadAll();
-    coursesList = courseRepo.loadAll();
+    try {
+        usersList = userRepo.loadAll();
+    } catch (const CustomException& e) {
+        std::cout << "[System Warning] " << e.what() << "\n";
+    }
+
+    try {
+        coursesList = courseRepo.loadAll();
+    } catch (const CustomException& e) {
+        std::cout << "[System Warning] " << e.what() << "\n";
+    }
 
 
     std::ifstream enrolIn("data/enrolments_data.csv");
@@ -206,7 +215,10 @@ Person* RegistrationSystem::loginUser() {
         std::cout << "  UNIVERSITY REGISTRATION SYSTEM LOGIN\n";
         std::cout << "=========================================\n";
         std::cout << "Enter User ID ('exit' to shutdown): ";
-        std::cin >> inputID;
+        if (!(std::cin >> inputID)) {
+            std::cout << "\n[System] Input stream closed. Shutting down.\n";
+            return nullptr;
+        }
 
         std::string lowerInput = inputID;
         for (char& c : lowerInput) c = std::tolower(c);

@@ -7,7 +7,7 @@
 int AttendanceSession::defaultExpiryDuration = 15;
 
 AttendanceSession::AttendanceSession(const std::string& sessionID, const std::string& sessionDate)
-    : sessionID(sessionID), sessionDate(sessionDate), activeMechanism(nullptr) {}
+    : sessionID(sessionID), sessionDate(sessionDate), activeMechanism(nullptr), isOpen(false), openTime(0) {}
 
 void AttendanceSession::setCaptureMechanism(AttendanceCapture* mechanism) {
     activeMechanism = mechanism;
@@ -24,15 +24,24 @@ void AttendanceSession::executeCapture(Course* course) {
 
     AttendanceRegister* reg = course->getRegister();
     activeMechanism->beginSession();
+    
+    isOpen = true;
+    openTime = std::time(nullptr);
 
-    while (true) {
+    while (isOpen) {
         std::string id = activeMechanism->captureNext();
         
         std::string lowerId = id;
         for (char& c : lowerId) c = std::tolower(c);
         
         if (lowerId == "exit" || id.empty()) {
+            isOpen = false;
             break;
+        }
+        
+        if (std::time(nullptr) > openTime + (defaultExpiryDuration * 60)) {
+            isOpen = false;
+            throw SessionClosedException("Session has expired. Cannot mark attendance.");
         }
         
         try {
@@ -54,6 +63,10 @@ void AttendanceSession::executeCapture(Course* course) {
     }
 
     activeMechanism->endSession();
+}
+
+void AttendanceSession::close() {
+    isOpen = false;
 }
 
 std::string AttendanceSession::getSessionID() const { return sessionID; }

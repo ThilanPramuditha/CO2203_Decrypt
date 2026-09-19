@@ -9,11 +9,12 @@ private:
   int labGroupSize;
 
 public:
-  LabCourse(std::string code, std::string title, int cap, TimetableSlot sched,
+  LabCourse(std::string code, std::string title, int credits, int cap, TimetableSlot sched,
             int groupSize);
 
   void checkEligibility(Student *s) const override;
   std::string getCourseType() const override { return "LabCourse"; }
+  std::string getGradingBehaviour() const override;
 };
 
 #endif

@@ -17,6 +17,7 @@
 #include "LabCourse.h"
 #include "ProjectCourse.h"
 #include "TimetableSlot.h"
+#include "CustomExceptions.h"
 
 template <typename T>
 class Repository;
@@ -50,9 +51,7 @@ public:
         std::ifstream inFile(filePath);
 
         if (!inFile.is_open()) {
-            std::ofstream newFile(filePath);
-            newFile.close();
-            return loadedEntities; 
+            throw CustomException("Data file missing or inaccessible: " + filePath);
         }
 
         std::string line;
@@ -122,9 +121,7 @@ public:
         std::ifstream inFile(filePath);
 
         if (!inFile.is_open()) {
-            std::ofstream newFile(filePath);
-            newFile.close();
-            return loadedEntities; 
+            throw CustomException("Data file missing or inaccessible: " + filePath);
         }
 
         std::string line;
@@ -137,12 +134,14 @@ public:
             if (line.empty()) continue; 
 
             std::stringstream ss(line);
-            std::string type, code, title, capacityStr, location, supervisor;
+            std::string type, code, title, creditsStr, gradBehavStr, capacityStr, location, supervisor;
             std::string dayStr, startStr, endStr, prereqStr;
             
             std::getline(ss, type, ',');
             std::getline(ss, code, ',');
             std::getline(ss, title, ',');
+            std::getline(ss, creditsStr, ',');
+            std::getline(ss, gradBehavStr, ',');
             std::getline(ss, capacityStr, ',');
             std::getline(ss, location, ',');
             std::getline(ss, supervisor, ',');
@@ -151,6 +150,7 @@ public:
             std::getline(ss, endStr, ',');
             std::getline(ss, prereqStr, ',');
             
+            int creds = creditsStr.empty() ? 0 : std::stoi(creditsStr);
             int cap = capacityStr.empty() ? 0 : std::stoi(capacityStr);
             int day = dayStr.empty() ? 1 : std::stoi(dayStr);
             int start = startStr.empty() ? 800 : std::stoi(startStr);
@@ -160,12 +160,12 @@ public:
             
             Course* newCourse = nullptr;
             if (type == "LectureCourse") {
-                newCourse = new LectureCourse(code, title, cap, parsedSlot);
+                newCourse = new LectureCourse(code, title, creds, cap, parsedSlot);
             } else if (type == "LabCourse") {
                 int groupSize = cap / 2;
-                newCourse = new LabCourse(code, title, cap, parsedSlot, groupSize);
+                newCourse = new LabCourse(code, title, creds, cap, parsedSlot, groupSize);
             } else if (type == "ProjectCourse") {
-                newCourse = new ProjectCourse(code, title, cap, parsedSlot);
+                newCourse = new ProjectCourse(code, title, creds, cap, parsedSlot);
             }
             
             if (newCourse) {

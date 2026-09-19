@@ -1,7 +1,7 @@
-LectureCourse,CO2203,Object Oriented Programming,10,L531,L001,2,0900,1100,NONE
-LabCourse,CO2201,Data Structures and Algorithms,40,AI Lab,L001,4,1300,1500,NONE
-ProjectCourse,CO2307,Software Engineering,150,L532,L003,1,0800,1000,CO2203
-LectureCourse,CO2206,Operating Systems,150,L531,L002,2,0800,1000,NONE
-LabCourse,CO2210,Programming Quest,50,Computer Lab,L004,5,0800,1200,NONE
-LectureCourse,IS2202,Engineering Mathematics,150,L221,L005,5,1300,1600,NONE
-LectureCourse,IS2262,Economics and Management,150,L221,L005,4,0900,1100,NONE
+LectureCourse,CO2203,Object Oriented Programming,2,70% Final Exam 30% Continuous Assessment,10,L531,L001,2,0900,1100,NONE
+LabCourse,CO2201,Data Structures and Algorithms,2,50% Practical 50% Final Exam,40,AI Lab,L001,4,1300,1500,NONE
+ProjectCourse,CO2307,Software Engineering,3,100% Final Project Submission,150,L532,L003,1,0800,1000,CO2203
+LectureCourse,CO2206,Operating Systems,2,70% Final Exam 30% Continuous Assessment,150,L531,L002,2,0800,1000,NONE
+LabCourse,CO2210,Programming Quest,2,50% Practical 50% Final Exam,50,Computer Lab,L004,5,0800,1200,NONE
+LectureCourse,IS2202,Engineering Mathematics,2,70% Final Exam 30% Continuous Assessment,150,L221,L005,5,1300,1600,NONE
+LectureCourse,IS2262,Economics and Management,2,70% Final Exam 30% Continuous Assessment,150,L221,L005,4,0900,1100,NONE

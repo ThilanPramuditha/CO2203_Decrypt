@@ -2,6 +2,7 @@
 #define ATTENDANCE_SESSION_H
 
 #include <string>
+#include <ctime>
 
 class AttendanceCapture;
 
@@ -11,6 +12,8 @@ private:
     std::string sessionDate;
     static int defaultExpiryDuration;
     AttendanceCapture* activeMechanism;
+    bool isOpen;
+    std::time_t openTime;
 
 public:
     AttendanceSession(const std::string& sessionID, const std::string& sessionDate);
@@ -20,6 +23,8 @@ public:
 
     std::string getSessionID() const;
     std::string getSessionDate() const;
+
+    void close();
 
     static int getDefaultExpiryDuration();
     static void setDefaultExpiryDuration(int minutes);
