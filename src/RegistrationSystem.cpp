@@ -256,7 +256,7 @@ Person* RegistrationSystem::loginUser() {
 
         for (Person* user : usersList) {
             if (user->getID() == inputID) {
-                std::cout << "\n[System] Authentication successful. Welcome!\n";
+                std::cout << "\n[System] Authentication successful.\n";
                 if (user->getRole() == "Administrator") {
                     static_cast<Administrator*>(user)->setSystem(this);
                 }

@@ -29,22 +29,22 @@ void AttendanceSession::executeCapture(Course* course) {
     openTime = std::time(nullptr);
 
     while (isOpen) {
-        std::string id = activeMechanism->captureNext();
-        
-        std::string lowerId = id;
-        for (char& c : lowerId) c = std::tolower(c);
-        
-        if (lowerId == "exit" || id.empty()) {
-            isOpen = false;
-            break;
-        }
-        
-        if (std::time(nullptr) > openTime + (defaultExpiryDuration * 60)) {
-            isOpen = false;
-            throw SessionClosedException("Session has expired. Cannot mark attendance.");
-        }
-        
         try {
+            std::string id = activeMechanism->captureNext();
+            
+            std::string lowerId = id;
+            for (char& c : lowerId) c = std::tolower(c);
+            
+            if (lowerId == "exit" || lowerId == "eof" || id.empty()) {
+                isOpen = false;
+                break;
+            }
+            
+            if (std::time(nullptr) > openTime + (defaultExpiryDuration * 60)) {
+                isOpen = false;
+                throw SessionClosedException("Session has expired. Cannot mark attendance.");
+            }
+            
             if (!course->isStudentEnrolled(id)) {
                 throw NotEnrolledException("Student " + id + " is not enrolled in this course.");
             }
