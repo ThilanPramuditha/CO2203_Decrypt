@@ -50,7 +50,7 @@ std::string QRCodeCapture::captureNext() {
     while (true) {
         std::cout << "\nEnter decoded QR Token (or 'exit' to stop): ";
         std::string tokenInput;
-        std::getline(std::cin, tokenInput);
+        if (!(std::cin >> tokenInput)) return "exit";
         
         if (std::difftime(std::time(nullptr), sessionStartTime) > 120) {
             std::cout << "[ERROR] QR Code has expired. Session closed.\n";
@@ -67,7 +67,7 @@ std::string QRCodeCapture::captureNext() {
         if (tokenInput == sessionToken) {
             std::cout << "Token Validated! Enter Student ID: ";
             std::string studentID;
-            std::getline(std::cin, studentID);
+            if (!(std::cin >> studentID)) return "exit";
             return studentID;
         } else {
             std::cout << "[ERROR] Invalid or expired token. Please scan the active QR code.\n";

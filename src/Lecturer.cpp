@@ -26,22 +26,22 @@ void Lecturer::openSession(Course* c) {
     }
     
     std::cout << "Select Capture Mechanism:\n";
-    std::cout << "1. Console Card Reader\n";
-    std::cout << "2. QR Code Token\n";
+    std::cout << "1. QR Code Token\n";
+    std::cout << "2. Console Card Reader\n";
     std::cout << "Enter choice (or TEST for replay): ";
     std::string mechChoice;
     std::cin >> mechChoice;
     
     AttendanceCapture* reader = nullptr;
     if (mechChoice == "1") {
-        reader = new ConsoleCardReader();
+        reader = new QRCodeCapture();
     } else if (mechChoice == "TEST") {
         std::string filename;
         std::cout << "Enter replay filename: ";
         std::cin >> filename;
         reader = new FileReplayCapture(filename);
     } else {
-        reader = new QRCodeCapture();
+        reader = new ConsoleCardReader();
     }
     
     session->setCaptureMechanism(reader);
