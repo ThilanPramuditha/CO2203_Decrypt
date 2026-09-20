@@ -11,9 +11,9 @@ void LabCourse::checkEligibility(Student *s) const {
     bool capError = getEnrolledCount() >= static_cast<size_t>(labGroupSize);
     
     if (preqError && capError) {
-        throw CapacityException("Prerequisites not met for this course (chain violation).\n[BLOCKED BY SYSTEM] Course is at full capacity.");
+        throw CapacityException("Prerequisites not met for this course.\n[BLOCKED BY SYSTEM] Course is at full capacity.");
     } else if (preqError) {
-        throw CustomException("Prerequisites not met for this course (chain violation).");
+        throw CustomException("Prerequisites not met for this course.");
     } else if (capError) {
         throw CapacityException("Course is at full capacity.");
     }
