@@ -20,9 +20,6 @@ public:
     ~AttendanceRegister();
 
     // Rule of Three: Explicitly delete copy constructor and assignment operator
-    // Justification: AttendanceRegister manages dynamically allocated AttendanceSession objects.
-    // Copying this class would lead to shallow copies of pointers and double-deletion in the destructor,
-    // and deep copying active sessions does not make sense in the domain model.
     AttendanceRegister(const AttendanceRegister&) = delete;
     AttendanceRegister& operator=(const AttendanceRegister&) = delete;
 

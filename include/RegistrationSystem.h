@@ -19,9 +19,6 @@ public:
     ~RegistrationSystem(); 
 
     // Rule of Three/Five: Explicitly delete copy constructor and assignment operator
-    // Justification: RegistrationSystem acts as a unique, central manager that owns the dynamically
-    // allocated Person and Course objects. Copying it would result in double-free errors on destruction,
-    // and duplicating the central system state is semantically incorrect.
     RegistrationSystem(const RegistrationSystem&) = delete;
     RegistrationSystem& operator=(const RegistrationSystem&) = delete;
 
