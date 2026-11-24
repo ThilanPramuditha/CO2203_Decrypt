@@ -139,6 +139,10 @@ void Lecturer::displayMenu(RegistrationSystem* sys) {
         std::cout << "Enter choice: ";
         
         if (!(std::cin >> choice)) {
+            if (std::cin.eof()) {
+                std::cout << "\n[System] Input stream closed. Logging out.\n";
+                return;
+            }
             std::cin.clear(); 
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
             std::cout << "[ERROR] Invalid input.\n";
